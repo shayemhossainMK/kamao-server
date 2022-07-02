@@ -7,9 +7,7 @@ const port = process.env.PORT || 5000;
 // this is midlewiere
 app.use(
   cors({
-    origin: true,
-    optionsSuccessStatus: 200,
-    credentials: true,
+    origin: "https://mk-social-commerce.web.app/",
   })
 );
 app.use(express.json());
