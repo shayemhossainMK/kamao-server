@@ -5,7 +5,13 @@ require("dotenv").config();
 const port = process.env.PORT || 5000;
 
 // this is midlewiere
-app.use(cors({ origin: `https://mk-social-commerce.web.app/` }));
+app.use(
+  cors({
+    origin: true,
+    optionsSuccessStatus: 200,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // This is from database
@@ -58,7 +64,6 @@ async function run() {
     app.get("/admin/:email", async (req, res) => {
       const email = req.params.email;
       const user = await userCollection.findOne({ email: email });
-      console.log(user);
       const isAdmin = user.role === "admin";
       res.send({ admin: isAdmin });
     });
