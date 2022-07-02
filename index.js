@@ -11,7 +11,7 @@ app.use(express.json());
 // This is from database
 
 const { MongoClient, ServerApiVersion } = require("mongodb");
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.6rdkwh0.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://mk-social-commerce:20Z62Rg1rRkkkecD@cluster0.6rdkwh0.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
