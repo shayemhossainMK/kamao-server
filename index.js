@@ -4,6 +4,11 @@ const cors = require("cors");
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 
+// this is uploading sheet file
+const render = require("xlsx");
+const file = render.readFile("./task.xlsx");
+const profitFile = render.readFile("./profitlink.xlsx");
+
 // this is midlewiere
 app.use(cors());
 app.use(express.json());
@@ -23,6 +28,12 @@ async function run() {
     console.log("Database connected");
 
     const userCollection = client.db("mk-social-commerce").collection("user");
+    const profitLinkCollection = client
+      .db("mk-social-commerce")
+      .collection("profit-link");
+    const queryLinkCollection = client
+      .db("mk-social-commerce")
+      .collection("query-link");
 
     //get all user
     app.get("/user", async (req, res) => {
@@ -68,6 +79,66 @@ async function run() {
       const user = await userCollection.findOne({ email: email });
       const isAdmin = user?.role === "admin";
       res.send({ admin: isAdmin });
+    });
+
+    //sheet data upload for all brands
+    app.get("/upload", async (req, res) => {
+      const sheets = file.SheetNames;
+      const data = [];
+      for (let i = 0; i < sheets.length; i++) {
+        const sheetName = sheets[i];
+        const sheetData = render.utils.sheet_to_json(file.Sheets[sheetName]);
+        sheetData.forEach((a) => {
+          data.push(a);
+        });
+      }
+      res.send(data);
+    });
+
+    //Sheet data upload in backend and also save in mongodb database
+    app.put("/profitlink", async (req, res) => {
+      const sheets = profitFile.SheetNames;
+      const data = [];
+      for (let i = 0; i < sheets.length; i++) {
+        const sheetName = sheets[i];
+        const sheetData = render.utils.sheet_to_json(
+          profitFile.Sheets[sheetName]
+        );
+        sheetData.forEach((a) => {
+          data.push(a);
+        });
+      }
+      const options = { ordered: true };
+      const result = await profitLinkCollection.insertMany(data, options);
+
+      res.send(result);
+    });
+
+    //get all data from database for profit link
+    app.get("/profitlink", async (req, res) => {
+      const result = await profitLinkCollection.find().toArray();
+      res.send(result);
+    });
+
+    // add query link
+    app.post("/querylink", async (req, res) => {
+      const link = req.body;
+      const result = await queryLinkCollection.insertOne(link);
+      res.send(result);
+    });
+    // add query link
+    app.get("/querylink", async (req, res) => {
+      const result = await queryLinkCollection.find().toArray();
+
+      const myfunc = (value) => {
+        const mainLink = value.mainLink;
+        const id = value._id;
+        const token = value.token;
+        const fullLink = mainLink + `&${token}`;
+        console.log(fullLink);
+      };
+      result.map(myfunc);
+      res.send(result);
     });
   } finally {
   }
