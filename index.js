@@ -35,6 +35,10 @@ async function run() {
       .db("mk-social-commerce")
       .collection("query-link");
 
+    const fullLinkCollection = client
+      .db("mk-social-commerce")
+      .collection("full-link");
+
     //get all user
     app.get("/user", async (req, res) => {
       const users = await userCollection.find().toArray();
@@ -126,19 +130,35 @@ async function run() {
       const result = await queryLinkCollection.insertOne(link);
       res.send(result);
     });
-    // add query link
-    app.get("/querylink", async (req, res) => {
-      const result = await queryLinkCollection.find().toArray();
+    //updating quary link with user id from firebase
+    // app.put("/querylink", async (req, res) => {
+    //   const userId = req.body;
+    //   const options = { upsert: true };
+    //   const updateDoc = {
+    //     $set: userId,
+    //   };
+    //   const result = await userCollection.updateOne(filter, updateDoc, options);
 
-      const myfunc = (value) => {
-        const mainLink = value.mainLink;
-        const id = value._id;
-        const token = value.token;
-        const fullLink = mainLink + `&${token}`;
-        console.log(fullLink);
-      };
-      result.map(myfunc);
-      res.send(result);
+    //   res.send(result);
+    // });
+    // add query link
+    app.get("/querylink/:userid", async (req, res) => {
+      const userid = req.params.userid;
+      console.log(userid);
+      const result = await queryLinkCollection.find().toArray();
+      const data = result.pop();
+
+      // const user = await userCollection.find().toArray();
+      // const userID = user[0]._id;
+      // console.log(userID);
+      // const ID = userID.split(" ")[1];
+
+      const mainLink = data.mainLink;
+      const token = data.token;
+      const fullLink = mainLink + `&aff_trace_key=${token}` + `&u_id=${userid}`;
+      console.log(fullLink);
+      res.send(fullLink);
+      // const full = fullLinkCollection.insertOne(fullLink);
     });
   } finally {
   }
